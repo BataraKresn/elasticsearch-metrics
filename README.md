@@ -26,6 +26,18 @@ Agent untuk monitoring Elasticsearch production cluster dengan SSL support untuk
 └─────────────────────┘    └─────────────────────┘    └─────────────────────┘
 ```
 
+### **Complete Architecture Overview**
+![Agent-Only Architecture Overview](images/ES-agent_Overview_Architecture.png)
+
+**High-Level Architecture Components:**
+- **🏢 Elasticsearch Production Cluster**: SSL-enabled cluster dengan authentication
+- **📊 Metrics Collection Agents**: Three specialized exporters untuk comprehensive monitoring
+- **🔒 Tailscale VPN Network**: Secure tunnel untuk external access
+- **📈 External Monitoring Stack**: Remote Prometheus dan Grafana servers
+- **🛡️ Security Layers**: Multiple security controls (UFW, SSL, VPN)
+
+This overview diagram shows the complete flow dari data collection hingga visualization, highlighting the security-focused agent-only approach yang minimizes resource overhead pada production Elasticsearch cluster.
+
 ## 📊 Detailed Architecture Diagrams
 
 ### **Data Flow & Scraping Pattern**
@@ -738,10 +750,11 @@ Monitoring overhead:
 
 ### **📊 Architecture Diagrams Summary**
 
-1. **[Data Flow & Scraping Pattern](images/ES-agent_DataFlow_&_Scraping_Pattern.png)**: Shows how metrics flow from ES cluster → Agents → External Prometheus → Grafana
-2. **[Network & Security Architecture](images/ES-agent_Network_&_Security_Architecture.png)**: Illustrates VPN security, firewall rules, dan network isolation
-3. **[Metrics Collection Matrix](images/ES-agent_Metrics_Collection_Matrix.png)**: Complete breakdown of all available metrics dari each agent
-4. **[Deployment & Configuration Flow](images/ES-Agent_Deployment_&_ConfigurationFlow.png)**: Step-by-step deployment process dari setup to production
+1. **[Complete Architecture Overview](images/ES-agent_Overview_Architecture.png)**: High-level view of entire monitoring architecture dari ES cluster to external visualization
+2. **[Data Flow & Scraping Pattern](images/ES-agent_DataFlow_&_Scraping_Pattern.png)**: Detailed flow showing how metrics travel from ES cluster → Agents → External Prometheus → Grafana
+3. **[Network & Security Architecture](images/ES-agent_Network_&_Security_Architecture.png)**: Comprehensive security model dengan VPN, firewall rules, dan network isolation
+4. **[Metrics Collection Matrix](images/ES-agent_Metrics_Collection_Matrix.png)**: Complete breakdown of all available metrics dari each monitoring agent
+5. **[Deployment & Configuration Flow](images/ES-Agent_Deployment_&_ConfigurationFlow.png)**: Step-by-step deployment process dari initial setup to production monitoring
 
 ### **🔧 Ready for Production**
 
