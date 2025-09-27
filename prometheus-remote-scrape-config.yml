@@ -1,0 +1,29 @@
+scrape_configs:
+  # Elasticsearch Metrics (from remote server)
+  - job_name: 'elasticsearch-cluster'
+    static_configs:
+      - targets: ['100.105.46.41:9114']  # IP Tailscale server elasticsearch
+    metrics_path: /metrics
+    scrape_interval: 30s
+    scrape_timeout: 15s
+    relabel_configs:
+      - target_label: service
+        replacement: 'elasticsearch'
+      - target_label: cluster_name
+        replacement: 'elastic-production'
+      - target_label: instance
+        replacement: 'elasticsearch-cluster'
+
+  # System Metrics (from remote server)  
+  - job_name: 'system-metrics'
+    static_configs:
+      - targets: ['100.105.46.41:9100']
+    metrics_path: /metrics
+    scrape_interval: 15s
+    
+  # Container Metrics (from remote server)
+  - job_name: 'container-metrics'
+    static_configs:
+      - targets: ['100.105.46.41:8080']
+    metrics_path: /metrics
+    scrape_interval: 30s

@@ -1,0 +1,107 @@
+# Elasticsearch Metrics Stack - .gitignore
+
+# Environment files with credentials (CRITICAL - NEVER COMMIT!)
+.env
+.env.local
+.env.production
+.env.staging
+*.env
+
+# Prometheus data directories
+prometheus/data/
+prometheus_data/
+/prometheus_data
+
+# Grafana data directories  
+grafana/data/
+grafana_data/
+/grafana_data
+
+# Docker volumes and persistent data
+volumes/
+data/
+
+# Log files
+logs/*.log
+logs/prometheus/
+logs/grafana/
+logs/exporters/
+*.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Runtime files
+*.pid
+*.lock
+
+# Backup files
+*.bak
+*.backup
+*_backup
+
+# Archive files
+*.tar.gz
+*.zip
+*.rar
+*.7z
+
+# Grafana specific
+grafana/grafana.db
+grafana/sessions/
+grafana/plugins/
+
+# Prometheus specific
+prometheus/wal/
+prometheus/chunks_head/
+
+# Node modules (if using any JS tooling)
+node_modules/
+npm-debug.log*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Files with hardcoded credentials (SECURITY RISK)
+# These files contain hardcoded passwords and should be templated
+docker-compose.yml.bak
+scripts/*.sh.bak
+
+# Keep important files (use ! to negate ignore)
+!.env.sample
+!docker-compose.yml
+!prometheus.yml
+!prometheus-*.yml
+!grafana/*.json
+!scripts/*.sh
+!*.md
+!deploy-agents.sh
+
+# WARNING: The following files currently contain hardcoded credentials:
+# - docker-compose.yml (line 9: --es.uri with password)
+# - scripts/setup.sh (lines 7,12: curl with password)
+# These should be updated to use environment variables!

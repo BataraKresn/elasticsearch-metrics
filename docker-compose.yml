@@ -1,0 +1,113 @@
+services:
+  elasticsearch-exporter:
+    image: quay.io/prometheuscommunity/elasticsearch-exporter:latest
+    container_name: elasticsearch-exporter
+    restart: always
+    ports:
+      - "100.105.46.41:9114:9114"
+    command:
+      - '--es.uri=http://elastic:K4a8ep8sMJMu4YxD@es-master:9200'
+      - '--es.all'
+      - '--es.indices' 
+      - '--es.shards'
+      - '--es.timeout=30s'
+      - '--web.listen-address=:9114'
+    networks:
+      - elasticsearch
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9114/metrics"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter-es
+    restart: always
+    ports:
+      - "100.105.46.41:9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+      - /data:/host/data:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+      - '--collector.filesystem.fs-types-exclude=^(autofs|binfmt_misc|bpf|cgroup2?|configfs|debugfs|devpts|devtmpfs|fusectl|hugetlbfs|iso9660|mqueue|nsfs|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|selinuxfs|squashfs|sysfs|tracefs)$$'
+      - '--collector.diskstats'
+      - '--collector.meminfo'
+      - '--collector.netdev'
+      - '--collector.loadavg'
+      - '--collector.cpu'
+    pid: host
+    networks:
+      - elasticsearch
+    
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.0
+    container_name: cadvisor-es
+    restart: always
+    ports:
+      - "100.105.46.41:8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    devices:
+      - /dev/kmsg
+    networks:
+      - elasticsearch
+    privileged: true
+
+  # Optional: Local Prometheus (uncomment to deploy)
+  # prometheus:
+  #   image: prom/prometheus:latest
+  #   container_name: prometheus-es
+  #   restart: always
+  #   ports:
+  #     - "100.105.46.41:9090:9090"
+  #   volumes:
+  #     - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+  #     - prometheus-data:/prometheus
+  #   command:
+  #     - '--config.file=/etc/prometheus/prometheus.yml'
+  #     - '--storage.tsdb.path=/prometheus'
+  #     - '--web.console.libraries=/etc/prometheus/console_libraries'
+  #     - '--web.console.templates=/etc/prometheus/consoles'
+  #     - '--storage.tsdb.retention.time=30d'
+  #     - '--web.enable-lifecycle'
+  #     - '--web.external-url=http://100.105.46.41:9090'
+  #   networks:
+  #     - elasticsearch-network
+
+  # Optional: Local Grafana (uncomment to deploy)  
+  # grafana:
+  #   image: grafana/grafana:latest
+  #   container_name: grafana-es
+  #   restart: always
+  #   ports:
+  #     - "100.105.46.41:3000:3000"
+  #   volumes:
+  #     - grafana-data:/var/lib/grafana
+  #     - ./grafana/datasource.json:/etc/grafana/provisioning/datasources/datasource.json:ro
+  #     - ./grafana/elasticsearch-dashboard.json:/var/lib/grafana/dashboards/elasticsearch.json:ro
+  #   environment:
+  #     - GF_SECURITY_ADMIN_PASSWORD=admin123
+  #     - GF_USERS_ALLOW_SIGN_UP=false
+  #   networks:
+  #     - elasticsearch-network
+
+# volumes:
+  # prometheus-data:
+  # grafana-data:
+
+networks:
+  elasticsearch:
+    name: elasticsearch
+    external: true

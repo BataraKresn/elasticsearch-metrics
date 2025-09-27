@@ -1,0 +1,112 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'elasticsearch-production'
+    datacenter: 'tailscale-network'
+    environment: 'production'
+
+# Alerting configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          # - alertmanager:9093
+
+rule_files:
+  - "rules/*.yml"
+
+scrape_configs:
+  # Elasticsearch Cluster Metrics (via elasticsearch-exporter)
+  - job_name: 'elasticsearch-cluster'
+    static_configs:
+      - targets: ['elasticsearch-exporter:9114']
+    metrics_path: /metrics
+    scrape_interval: 30s
+    scrape_timeout: 15s
+    relabel_configs:
+      - target_label: service
+        replacement: 'elasticsearch'
+      - target_label: cluster_name
+        replacement: 'elastic-production'
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'elasticsearch_.*'
+        target_label: component
+        replacement: 'elasticsearch'
+
+  # Node/System Metrics (CPU, Memory, Disk, Network)
+  - job_name: 'system-metrics'
+    static_configs:
+      - targets: ['node-exporter-es:9100']
+    metrics_path: /metrics
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    relabel_configs:
+      - target_label: service
+        replacement: 'system'
+      - target_label: instance_type
+        replacement: 'elasticsearch-host'
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'node_.*'
+        target_label: component
+        replacement: 'system'
+
+  # Container Metrics (Docker containers)
+  - job_name: 'container-metrics'
+    static_configs:
+      - targets: ['cadvisor-es:8080']
+    metrics_path: /metrics
+    scrape_interval: 30s
+    scrape_timeout: 15s
+    relabel_configs:
+      - target_label: service
+        replacement: 'containers'
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'container_.*'
+        target_label: component
+        replacement: 'docker'
+      - source_labels: [container_label_com_docker_compose_service]
+        target_label: elasticsearch_service
+        regex: '(es-master|es-data01|es-coord)'
+        replacement: '${1}'
+
+  # External Tailscale Endpoints (for remote access)
+  - job_name: 'elasticsearch-external'
+    static_configs:
+      - targets: 
+        - '100.105.46.41:9114'  # Elasticsearch Exporter
+        - '100.105.46.41:9100'  # Node Exporter  
+        - '100.105.46.41:8080'  # cAdvisor
+    metrics_path: /metrics
+    scrape_interval: 60s
+    scrape_timeout: 20s
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: '100.105.46.41:9114'
+        target_label: service_type
+        replacement: 'elasticsearch-metrics'
+      - source_labels: [__address__]
+        regex: '100.105.46.41:9100'
+        target_label: service_type
+        replacement: 'system-metrics'
+      - source_labels: [__address__]
+        regex: '100.105.46.41:8080'
+        target_label: service_type
+        replacement: 'container-metrics'
+      - target_label: access_method
+        replacement: 'external-tailscale'
+
+# Remote write configuration (for external Prometheus servers)
+remote_write:
+  - url: "https://your-external-prometheus/api/v1/write"
+    # Uncomment and configure for remote write
+    # basic_auth:
+    #   username: "prometheus"
+    #   password: "your-password"
+    # write_relabel_configs:
+    #   - source_labels: [__name__]
+    #     regex: 'elasticsearch_.*|node_.*|container_.*'
+    #     action: keep

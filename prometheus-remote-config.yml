@@ -1,0 +1,88 @@
+# Remote Prometheus Configuration for External Server
+# Add this to your remote Prometheus server's prometheus.yml
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'elasticsearch-production'
+    datacenter: 'tailscale-network'
+    instance: 'elastic-production-agent'
+
+# Remote write configuration (optional - if you want to send to multiple destinations)
+remote_write:
+  - url: "https://your-remote-prometheus-server/api/v1/write"
+    # Configure authentication as needed
+    # basic_auth:
+    #   username: "your-username"
+    #   password: "your-password"
+
+scrape_configs:
+  # Elasticsearch Production Cluster Metrics
+  - job_name: 'elasticsearch-production'
+    static_configs:
+      - targets: ['100.105.46.41:9114']
+    metrics_path: /metrics
+    scrape_interval: 30s
+    scrape_timeout: 10s
+    scheme: http
+    params:
+      format: ['prometheus']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: 100.105.46.41:9114
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'elasticsearch_.*'
+        target_label: service
+        replacement: 'elasticsearch'
+      - target_label: environment
+        replacement: 'production'
+      - target_label: cluster_name
+        replacement: 'elastic-production'
+
+  # System/Node Metrics 
+  - job_name: 'elasticsearch-node-system'
+    static_configs:
+      - targets: ['100.105.46.41:9100']
+    metrics_path: /metrics
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    scheme: http
+    relabel_configs:
+      - target_label: service
+        replacement: 'node-system'
+      - target_label: environment
+        replacement: 'production'
+      - target_label: cluster_name
+        replacement: 'elastic-production'
+
+  # Container Metrics
+  - job_name: 'elasticsearch-containers'
+    static_configs:
+      - targets: ['100.105.46.41:8080']
+    metrics_path: /metrics
+    scrape_interval: 30s
+    scrape_timeout: 15s
+    scheme: http
+    relabel_configs:
+      - target_label: service
+        replacement: 'containers'
+      - target_label: environment
+        replacement: 'production'
+      - target_label: cluster_name
+        replacement: 'elastic-production'
+
+# Alerting Rules (optional)
+rule_files:
+  - "elasticsearch_alerts.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          # - alertmanager:9093

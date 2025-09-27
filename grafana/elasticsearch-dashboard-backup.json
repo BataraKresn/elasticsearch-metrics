@@ -1,0 +1,461 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Elasticsearch Production Metrics",
+    "tags": ["elasticsearch", "production", "monitoring"],
+    "timezone": "browser",
+    "editable": true,
+    "graphTooltip": 1,
+    "links": [],
+    "panels": [
+      {
+        "id": 1,
+        "title": "Cluster Health Status",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "elasticsearch_cluster_health_status{color=\"green\"} * 2 + elasticsearch_cluster_health_status{color=\"yellow\"} * 1 + elasticsearch_cluster_health_status{color=\"red\"} * 0",
+            "legendFormat": "Health",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {"options": {"0": {"text": "RED", "color": "red"}}, "type": "value"},
+              {"options": {"1": {"text": "YELLOW", "color": "yellow"}}, "type": "value"},
+              {"options": {"2": {"text": "GREEN", "color": "green"}}, "type": "value"}
+            ],
+            "noValue": "Unknown",
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 1},
+                {"color": "green", "value": 2}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 6, "w": 4, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Total Nodes",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "elasticsearch_cluster_health_number_of_nodes",
+            "legendFormat": "Nodes",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "red", "value": 0},
+                {"color": "yellow", "value": 2},
+                {"color": "green", "value": 3}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 6, "w": 4, "x": 4, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Active Shards",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "elasticsearch_cluster_health_active_shards",
+            "legendFormat": "Active",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "palette-classic"}
+          }
+        },
+        "gridPos": {"h": 6, "w": 4, "x": 8, "y": 0}
+      },
+      {
+        "id": 4,
+        "title": "Primary Shards",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "elasticsearch_cluster_health_active_primary_shards",
+            "legendFormat": "Primary",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 4, "x": 12, "y": 0}
+      },
+      {
+        "id": 5,
+        "title": "Unassigned Shards",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "elasticsearch_cluster_health_unassigned_shards",
+            "legendFormat": "Unassigned",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 1},
+                {"color": "red", "value": 5}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 6, "w": 4, "x": 16, "y": 0}
+      },
+      {
+        "id": 6,
+        "title": "Data Nodes",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "elasticsearch_cluster_health_number_of_data_nodes",
+            "legendFormat": "Data Nodes",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {"h": 6, "w": 4, "x": 20, "y": 0}
+      },
+      {
+        "id": 7,
+        "title": "JVM Heap Usage by Node",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "elasticsearch_jvm_memory_used_bytes{area=\"heap\"} / elasticsearch_jvm_memory_max_bytes{area=\"heap\"} * 100",
+            "legendFormat": "{{name}} - Heap %",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 70},
+                {"color": "red", "value": 90}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6}
+      },
+      {
+        "id": 8,
+        "title": "CPU Usage by Node",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "elasticsearch_process_cpu_percent",
+            "legendFormat": "{{name}} - CPU %",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6}
+      },
+      {
+        "id": 9,
+        "title": "Indexing Rate",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(elasticsearch_indices_indexing_index_total[5m])",
+            "legendFormat": "{{name}} - Docs/sec",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops"
+          }
+        },
+        "gridPos": {"h": 8, "w": 8, "x": 0, "y": 14}
+      },
+      {
+        "id": 10,
+        "title": "Search Rate",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(elasticsearch_indices_search_query_total[5m])",
+            "legendFormat": "{{name}} - Queries/sec",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops"
+          }
+        },
+        "gridPos": {"h": 8, "w": 8, "x": 8, "y": 14}
+      },
+      {
+        "id": 11,
+        "title": "Search Fetch Rate",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(elasticsearch_indices_search_fetch_total[5m])",
+            "legendFormat": "{{name}} - Fetch/sec",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops"
+          }
+        },
+        "gridPos": {"h": 8, "w": 8, "x": 16, "y": 14}
+      },
+      {
+        "id": 12,
+        "title": "Disk Usage by Node",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "(elasticsearch_filesystem_data_size_bytes - elasticsearch_filesystem_data_available_bytes) / elasticsearch_filesystem_data_size_bytes * 100",
+            "legendFormat": "{{name}} - Disk %",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 80},
+                {"color": "red", "value": 95}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 22}
+      },
+      {
+        "id": 13,
+        "title": "Index Store Size",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "elasticsearch_indices_store_size_bytes",
+            "legendFormat": "{{name}} - Store Size",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "bytes"
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 22}
+      },
+      {
+        "id": 14,
+        "title": "JVM GC Count",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(elasticsearch_jvm_gc_collection_seconds_count[5m])",
+            "legendFormat": "{{name}} - {{gc}} GC/sec",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops"
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 30}
+      },
+      {
+        "id": 15,
+        "title": "JVM GC Time",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(elasticsearch_jvm_gc_collection_seconds_sum[5m])",
+            "legendFormat": "{{name}} - {{gc}} GC Time/sec",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s"
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 30}
+      },
+      {
+        "id": 16,
+        "title": "Thread Pool Queue Size",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "elasticsearch_thread_pool_queue_count{type=~\"search|write|management\"}",
+            "legendFormat": "{{name}} - {{type}} queue",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 10},
+                {"color": "red", "value": 100}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 38}
+      },
+      {
+        "id": 17,
+        "title": "Thread Pool Rejected",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(elasticsearch_thread_pool_rejected_count{type=~\"search|write|management\"}[5m])",
+            "legendFormat": "{{name}} - {{type}} rejected/sec",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ops"
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 38}
+      },
+      {
+        "id": 18,
+        "title": "Circuit Breaker Usage",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "elasticsearch_breakers_estimated_size_bytes / elasticsearch_breakers_limit_size_bytes * 100",
+            "legendFormat": "{{name}} - {{breaker}} %",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": 0},
+                {"color": "yellow", "value": 80},
+                {"color": "red", "value": 95}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 46}
+      },
+      {
+        "id": 19,
+        "title": "Network Transport",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(elasticsearch_transport_rx_size_bytes_total[5m])",
+            "legendFormat": "{{name}} - RX bytes/sec",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(elasticsearch_transport_tx_size_bytes_total[5m])",
+            "legendFormat": "{{name}} - TX bytes/sec",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "Bps"
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 46}
+      },
+      {
+        "id": 20,
+        "title": "Documents Count by Index",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "elasticsearch_indices_docs_total",
+            "legendFormat": "{{index}} - Total Docs",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short"
+          }
+        },
+        "gridPos": {"h": 6, "w": 12, "x": 0, "y": 54}
+      },
+      {
+        "id": 21,
+        "title": "Node Roles",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "elasticsearch_nodes_roles{role=~\"master|data|ingest\"}",
+            "legendFormat": "{{name}} - {{role}}",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {"options": {"0": {"text": "No"}}, "type": "value"},
+              {"options": {"1": {"text": "Yes"}}, "type": "value"}
+            ]
+          }
+        },
+        "gridPos": {"h": 6, "w": 12, "x": 12, "y": 54}
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "30s",
+    "schemaVersion": 36,
+    "version": 1,
+    "weekStart": "",
+    "gnetId": null,
+    "description": "Comprehensive Elasticsearch cluster monitoring dashboard with production metrics including cluster health, performance, JVM, disk usage, indexing rates, search rates, and detailed node statistics."
+  }
+}
